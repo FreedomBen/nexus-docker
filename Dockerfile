@@ -21,6 +21,8 @@ RUN apt-get update && apt-get upgrade -y \
     language-pack-en \
     locales \
     git \
+    unzip \
+    wget \
  && apt-get install -y --no-install-recommends \
     build-essential \
     libboost-all-dev \
@@ -45,10 +47,16 @@ ADD https://github.com/Nexusoft/Nexus/archive/${NEXUS_VERSION}.tar.gz /root/
 RUN cd /root \
  && tar xzvf ${NEXUS_VERSION}.tar.gz \
  && cd Nexus-${NEXUS_VERSION} \
- && make -f makefile.unix \
+ && make -j $(( $(nproc --all) - 1)) -f makefile.unix \
  && mv nexus /usr/local/bin/
 
 # Switch to the 'docker' user
 USER docker
+
+# Download current bootstrap db
+WORKDIR $DOCKER_HOME
+RUN wget http://nexusearth.com/bootstrap/LLD-Database/recent.zip \
+ && unzip recent.zip \
+ && rm recent.zip
 
 CMD /usr/local/bin/nexus

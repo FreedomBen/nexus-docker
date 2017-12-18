@@ -3,10 +3,11 @@ MAINTAINER Benjamin Porter
 
 ARG NEXUS_VERSION=0.2.3.1
 ENV DOCKER_HOME /home/docker
+ENV QT_GRAPHICSSYSTEM native
 
 ## Create a 'docker' user
-RUN addgroup --gid 9999 docker \
- && adduser --uid 9999 --gid 9999 --disabled-password --gecos "Docker User" docker \
+RUN addgroup --gid 1000 docker \
+ && adduser --uid 1000 --gid 1000 --disabled-password --gecos "Docker User" docker \
  && usermod -L docker
 
 ## APT setup
@@ -42,21 +43,24 @@ ENV LANG       en_US.UTF-8
 ENV LC_ALL     en_US.UTF-8
 RUN dpkg-reconfigure locales
 
-## Build and install Nexus
+## Build and install nexus/nexus-qt
+WORKDIR /root
 ADD https://github.com/Nexusoft/Nexus/archive/${NEXUS_VERSION}.tar.gz /root/
-RUN cd /root \
- && tar xzvf ${NEXUS_VERSION}.tar.gz \
+RUN tar xzvf ${NEXUS_VERSION}.tar.gz \
  && cd Nexus-${NEXUS_VERSION} \
  && make -j $(( $(nproc --all) - 1)) -f makefile.unix \
- && mv nexus /usr/local/bin/
+ && mv nexus /usr/local/bin/ \
+ && qmake-qt4 nexus-qt.pro "RELEASE=1" "USE_UPNP=1" \
+ && make -j $(( $(nproc --all) - 1)) \
+ && mv nexus-qt /usr/local/bin/
 
 # Switch to the 'docker' user
 USER docker
 
 # Download current bootstrap db
-WORKDIR $DOCKER_HOME
-RUN wget http://nexusearth.com/bootstrap/LLD-Database/recent.zip \
- && unzip recent.zip \
- && rm recent.zip
+#WORKDIR $DOCKER_HOME
+#RUN wget http://nexusearth.com/bootstrap/LLD-Database/recent.zip \
+# && unzip recent.zip \
+# && rm recent.zip
 
 CMD /usr/local/bin/nexus

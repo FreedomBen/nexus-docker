@@ -56,9 +56,9 @@ RUN tar xzvf ${NEXUS_VERSION}.tar.gz \
 
 # Switch to the 'docker' user
 USER docker
+WORKDIR $DOCKER_HOME
 
 # Download current bootstrap db
-#WORKDIR $DOCKER_HOME
 #RUN wget http://nexusearth.com/bootstrap/LLD-Database/recent.zip \
 # && unzip recent.zip \
 # && rm recent.zip

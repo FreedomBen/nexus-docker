@@ -50,7 +50,7 @@ RUN tar xzvf ${NEXUS_VERSION}.tar.gz \
  && cd Nexus-${NEXUS_VERSION} \
  && make -j $(( $(nproc --all) - 1)) -f makefile.unix \
  && mv nexus /usr/local/bin/ \
- && qmake-qt4 nexus-qt.pro "RELEASE=1" "USE_UPNP=1" \
+ && qmake-qt4 nexus-qt.pro "RELEASE=1" "USE_UPNP=1" "USE_LLD=1" \
  && make -j $(( $(nproc --all) - 1)) \
  && mv nexus-qt /usr/local/bin/
 
